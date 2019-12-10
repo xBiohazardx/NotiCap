@@ -176,6 +176,12 @@
 						android:layout_marginRight="8dp"
 						android:layout_weight="1"
 						android:text="@string/ssh_identity" />
+
+                    <Spinner
+                        android:id="@+id/identities"
+                        android:layout_width="wrap_content"
+                        android:layout_height="48dp"
+                        android:minWidth="128dp" />
 				</LinearLayout>
 
 				<com.google.android.material.textfield.TextInputLayout
