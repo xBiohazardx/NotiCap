@@ -86,4 +86,8 @@
     <string name="attachment_summary_on">Automatically download attachments for incoming emails
     </string>
     <string name="attachment_summary_off">Only download attachments when manually requested</string>
+	<string name="ssh">SSH</string>
+	<string name="mqtt">MQTT</string>
+	<string name="payload_to_send">Payload to send</string>
+	<string name="topic">Topic</string>
 </resources>

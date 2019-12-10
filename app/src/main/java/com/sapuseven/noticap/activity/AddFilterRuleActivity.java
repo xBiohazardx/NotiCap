@@ -4,9 +4,6 @@ import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
@@ -17,6 +14,10 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
 import android.widget.Switch;
+
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.sapuseven.noticap.R;
 import com.sapuseven.noticap.utils.FilterRule;
@@ -68,7 +69,8 @@ public class AddFilterRuleActivity extends AppCompatActivity {
 		daytimeSwitch = findViewById(R.id.daytime_switch);
 		tvMinNotiDelay = findViewById(R.id.minNotiDelay);
 
-		ActionBar actionBar = getSupportActionBar();
+
+        ActionBar actionBar = getSupportActionBar();
 		if (actionBar != null)
 			actionBar.setDisplayHomeAsUpEnabled(true);
 
