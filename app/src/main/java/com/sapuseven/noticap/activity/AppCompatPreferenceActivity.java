@@ -3,13 +3,14 @@ package com.sapuseven.noticap.activity;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
+import android.view.MenuInflater;
+import android.view.View;
+import android.view.ViewGroup;
+
 import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatDelegate;
-import android.view.MenuInflater;
-import android.view.View;
-import android.view.ViewGroup;
 
 public abstract class AppCompatPreferenceActivity extends PreferenceActivity {
 

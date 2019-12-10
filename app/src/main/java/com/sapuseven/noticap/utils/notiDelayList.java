@@ -1,8 +1,6 @@
-package com.sapuseven.noticap;
+package com.sapuseven.noticap.utils;
 
 import android.util.Log;
-
-import com.sapuseven.noticap.utils.FilterRule;
 
 import java.util.ArrayList;
 

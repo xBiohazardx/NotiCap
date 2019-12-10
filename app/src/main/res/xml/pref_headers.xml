@@ -10,7 +10,11 @@
 		android:icon="@drawable/identity"
 		android:title="@string/pref_identities"/>
 
-	<header
+    <header
+        android:fragment="com.sapuseven.noticap.activity.SettingsActivity$MqttPreferenceFragment"
+        android:title="MQTT Server Settings" />
+
+    <header
 		android:fragment="com.sapuseven.noticap.activity.SettingsActivity$InfosPreferenceFragment"
 		android:icon="@drawable/info"
 		android:title="@string/pref_infos"/>

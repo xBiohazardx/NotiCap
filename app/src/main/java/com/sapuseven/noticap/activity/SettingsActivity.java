@@ -10,12 +10,13 @@ import android.preference.Preference;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
-import androidx.core.app.NotificationCompat;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AlertDialog;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
+import androidx.core.app.NotificationCompat;
 
 import com.sapuseven.noticap.BuildConfig;
 import com.sapuseven.noticap.R;
@@ -62,7 +63,8 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 		return PreferenceFragment.class.getName().equals(fragmentName)
 				|| FiltersPreferenceFragment.class.getName().equals(fragmentName)
 				|| IdentitiesPreferenceFragment.class.getName().equals(fragmentName)
-				|| InfosPreferenceFragment.class.getName().equals(fragmentName);
+				|| InfosPreferenceFragment.class.getName().equals(fragmentName)
+				|| MqttPreferenceFragment.class.getName().equals(fragmentName);
 	}
 
 	public static class FiltersPreferenceFragment extends PreferenceFragment {
@@ -433,6 +435,34 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 					return true;
 				});
 			}
+		}
+
+		@Override
+		public void onResume() {
+			super.onResume();
+			actionBar.setDisplayHomeAsUpEnabled(true);
+		}
+
+		@Override
+		public boolean onOptionsItemSelected(MenuItem item) {
+			int id = item.getItemId();
+			if (id == android.R.id.home) {
+				getActivity().finish();
+				return true;
+			}
+			return super.onOptionsItemSelected(item);
+		}
+	}
+
+	public static class MqttPreferenceFragment extends PreferenceFragment {
+
+		@Override
+		public void onCreate(Bundle savedInstanceState) {
+
+			super.onCreate(savedInstanceState);
+			addPreferencesFromResource(R.xml.pref_mqtt_settings);
+			setHasOptionsMenu(true);
+
 		}
 
 		@Override

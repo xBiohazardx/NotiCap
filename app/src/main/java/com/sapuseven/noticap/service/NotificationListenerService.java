@@ -1,14 +1,25 @@
 package com.sapuseven.noticap.service;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
 
-import com.sapuseven.noticap.notiDelayList;
 import com.sapuseven.noticap.utils.FilterRule;
 import com.sapuseven.noticap.utils.SSHClient;
 import com.sapuseven.noticap.utils.SSHIdentity;
+import com.sapuseven.noticap.utils.notiDelayList;
 
+import org.eclipse.paho.android.service.MqttAndroidClient;
+import org.eclipse.paho.client.mqttv3.DisconnectedBufferOptions;
+import org.eclipse.paho.client.mqttv3.IMqttActionListener;
+import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
+import org.eclipse.paho.client.mqttv3.IMqttToken;
+import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
+import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
+import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -22,6 +33,63 @@ import java.util.Locale;
 import java.util.zip.DataFormatException;
 
 public class NotificationListenerService extends android.service.notification.NotificationListenerService {
+	MqttAndroidClient mqttAndroidClient;
+
+	@Override
+	public int onStartCommand(Intent intent, int flags, int startId) {
+		SharedPreferences prefs = androidx.preference.PreferenceManager.getDefaultSharedPreferences(this);
+		mqttAndroidClient = new MqttAndroidClient(getApplicationContext(), prefs.getString("server_uri", ""), "NotiCapClient");
+		mqttAndroidClient.setCallback(new MqttCallbackExtended() {
+			@Override
+			public void connectComplete(boolean reconnect, String serverURI) {
+				Log.d(TAG, "Connected");
+			}
+
+			@Override
+			public void connectionLost(Throwable cause) {
+				Log.d(TAG, "Connection lost");
+			}
+
+			@Override
+			public void messageArrived(String topic, MqttMessage message) throws Exception {
+
+			}
+
+			@Override
+			public void deliveryComplete(IMqttDeliveryToken token) {
+				Log.d(TAG, "Delivery complete");
+			}
+		});
+		MqttConnectOptions mqttConnectOptions = new MqttConnectOptions();
+		mqttConnectOptions.setAutomaticReconnect(true);
+		mqttConnectOptions.setCleanSession(false);
+
+		try {
+			mqttAndroidClient.connect(mqttConnectOptions, null, new IMqttActionListener() {
+				@Override
+				public void onSuccess(IMqttToken asyncActionToken) {
+					Log.d(TAG, "Successfully connected");
+					DisconnectedBufferOptions disconnectedBufferOptions = new DisconnectedBufferOptions();
+					disconnectedBufferOptions.setBufferEnabled(true);
+					disconnectedBufferOptions.setBufferSize(100);
+					disconnectedBufferOptions.setPersistBuffer(false);
+					disconnectedBufferOptions.setDeleteOldestMessages(false);
+					mqttAndroidClient.setBufferOpts(disconnectedBufferOptions);
+				}
+
+				@Override
+				public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
+					Log.d(TAG, "Error while connecting");
+				}
+			});
+		} catch (MqttException ex) {
+			ex.printStackTrace();
+		}
+
+
+		return START_STICKY;
+	}
+
 	private final String TAG = this.getClass().getSimpleName();
 	notiDelayList notiDelayList = new notiDelayList();
 
