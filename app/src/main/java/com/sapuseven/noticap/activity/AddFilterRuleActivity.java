@@ -14,11 +14,13 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
 import android.widget.Switch;
+import android.widget.TableLayout;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.material.tabs.TabLayout;
 import com.sapuseven.noticap.R;
 import com.sapuseven.noticap.utils.FilterRule;
 import com.sapuseven.noticap.utils.SSHIdentity;
@@ -41,6 +43,7 @@ public class AddFilterRuleActivity extends AppCompatActivity {
 	private Spinner identitiesDropDown;
 	private String from = "06:00";
 	private String to = "22:00";
+	TabLayout layout;
 	private final TimePickerDialog.OnTimeSetListener fromTimePickerListener = (view, selectedHour, selectedMinute) -> {
 		from = String.format(Locale.US, "%02d:%02d", selectedHour, selectedMinute);
 
@@ -69,6 +72,24 @@ public class AddFilterRuleActivity extends AppCompatActivity {
 		daytimeSwitch = findViewById(R.id.daytime_switch);
 		tvMinNotiDelay = findViewById(R.id.minNotiDelay);
 
+		layout = findViewById(R.id.exec_tablayout);
+		layout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+			@Override
+			public void onTabSelected(TabLayout.Tab tab) {
+				setView(tab.getPosition());
+			}
+
+			@Override
+			public void onTabUnselected(TabLayout.Tab tab) {
+
+			}
+
+			@Override
+			public void onTabReselected(TabLayout.Tab tab) {
+
+			}
+		});
+		setView(0);
 
         ActionBar actionBar = getSupportActionBar();
 		if (actionBar != null)
@@ -177,7 +198,7 @@ public class AddFilterRuleActivity extends AppCompatActivity {
 			tvFilterPackageName.setError(getString(R.string.error_field_required));
 			focusView = tvFilterPackageName;
 			cancel = true;
-		} else if (TextUtils.isEmpty(exec)) {
+		} else if (TextUtils.isEmpty(exec) ) {
 			tvExec.setError(getString(R.string.error_field_required));
 			focusView = tvExec;
 			cancel = true;
@@ -216,6 +237,19 @@ public class AddFilterRuleActivity extends AppCompatActivity {
 			} else {
 				finish();
 			}
+		}
+	}
+
+	private void setView(int position){
+		switch(position){
+			case 0:
+				findViewById(R.id.mqtt_container).setVisibility(View.VISIBLE);
+				findViewById(R.id.ssh_container).setVisibility(View.GONE);
+				break;
+			case 1:
+				findViewById(R.id.ssh_container).setVisibility(View.VISIBLE);
+				findViewById(R.id.mqtt_container).setVisibility(View.GONE);
+				break;
 		}
 	}
 
