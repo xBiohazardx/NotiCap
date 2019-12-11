@@ -24,7 +24,10 @@ public class FilterRule {
 	@NonNull
 	private Long identityID = 0L;
 	@NonNull
-	private String exec = "";
+	private String exec_ssh = "";
+	private String mqtt_payload = "";
+	private String mqtt_topic = "";
+	private String exec_type = "";
 	private int minNotiDelay = 10000;
 
 	public FilterRule() {
@@ -46,9 +49,12 @@ public class FilterRule {
 			from = rule.getString("from");
 			to = rule.getString("to");
 		}
+		mqtt_payload = rule.getString("mqtt_payload");
+		mqtt_topic = rule.getString("mqtt_topic");
+		exec_type = rule.getString("exec_type");
 		minNotiDelay = rule.getInt("minNotiDelay");
 		identityID = rule.getLong("identityID");
-		exec = rule.getString("exec");
+		exec_ssh = rule.getString("exec_ssh");
 	}
 
 	public static void saveRules(Context context, JSONObject data) throws IOException {
@@ -101,8 +107,11 @@ public class FilterRule {
 			result.put("from", from);
 			result.put("to", to);
 		}
+		result.put("mqtt_payload", mqtt_payload);
+		result.put("mqtt_topic", mqtt_topic);
+		result.put("exec_type", exec_type);
 		result.put("identityID", identityID);
-		result.put("exec", exec);
+		result.put("exec_ssh", exec_ssh);
 		return result;
 	}
 
@@ -158,11 +167,35 @@ public class FilterRule {
 	}
 
 	@NonNull
-	public String getExec() {
-		return exec;
+	public String getExec_ssh() {
+		return exec_ssh;
 	}
 
-	public void setExec(@NonNull String exec) {
-		this.exec = exec;
+	public void setExec_ssh(@NonNull String exec_ssh) {
+		this.exec_ssh = exec_ssh;
+	}
+
+	public String getMqtt_payload() {
+		return mqtt_payload;
+	}
+
+	public void setMqtt_payload(String mqtt_payload) {
+		this.mqtt_payload = mqtt_payload;
+	}
+
+	public String getMqtt_topic() {
+		return mqtt_topic;
+	}
+
+	public void setMqtt_topic(String mqtt_topic) {
+		this.mqtt_topic = mqtt_topic;
+	}
+
+	public String getExec_type() {
+		return exec_type;
+	}
+
+	public void setExec_type(String exec_type) {
+		this.exec_type = exec_type;
 	}
 }

@@ -14,7 +14,6 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
 import android.widget.Switch;
-import android.widget.TableLayout;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
@@ -39,7 +38,9 @@ public class AddFilterRuleActivity extends AppCompatActivity {
 	private EditText tvMinNotiDelay;
 	private EditText tvName;
 	private EditText tvFilterPackageName;
-	private EditText tvExec;
+	private EditText tvMqttTopic;
+	private EditText tvMqttPayload;
+	private EditText tvExec_ssh;
 	private Spinner identitiesDropDown;
 	private String from = "06:00";
 	private String to = "22:00";
@@ -67,10 +68,12 @@ public class AddFilterRuleActivity extends AppCompatActivity {
 		setContentView(R.layout.activity_add_filter);
 		tvName = findViewById(R.id.name);
 		tvFilterPackageName = findViewById(R.id.package_name);
-		tvExec = findViewById(R.id.exec);
+		tvExec_ssh = findViewById(R.id.exec_ssh);
 		identitiesDropDown = findViewById(R.id.identities);
 		daytimeSwitch = findViewById(R.id.daytime_switch);
 		tvMinNotiDelay = findViewById(R.id.minNotiDelay);
+		tvMqttPayload = findViewById(R.id.mqtt_payload);
+		tvMqttTopic = findViewById(R.id.mqtt_topic);
 
 		layout = findViewById(R.id.exec_tablayout);
 		layout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
@@ -130,9 +133,11 @@ public class AddFilterRuleActivity extends AppCompatActivity {
 			try {
 				FilterRule rule = new FilterRule(FilterRule.loadSavedFilterRules(this, false).getJSONArray("rules").getJSONObject(getIntent().getIntExtra("index", 0)));
 				tvName.setText(rule.getName());
-				tvExec.setText(rule.getExec());
+				tvExec_ssh.setText(rule.getExec_ssh());
 				tvFilterPackageName.setText(TextUtils.join("+", rule.getPackageNames()));
 				tvMinNotiDelay.setText(Integer.toString((rule.getMinNotiDelay())));
+				tvMqttTopic.setText(rule.getMqtt_topic());
+				tvMqttPayload.setText(rule.getMqtt_payload());
 				if (rule.useDaytime()) {
 					daytimeSwitch.setChecked(true);
 					from = rule.getFrom();
@@ -183,10 +188,19 @@ public class AddFilterRuleActivity extends AppCompatActivity {
 
 		String name = tvName.getText().toString();
 		String packageNameFilter = tvFilterPackageName.getText().toString();
-		String exec = tvExec.getText().toString();
+		String exec_ssh = tvExec_ssh.getText().toString();
+		String mqtt_payload = tvMqttPayload.getText().toString();
+		String mqtt_topic = tvMqttTopic.getText().toString();
+		String exec_type = "";
+		if(layout.getSelectedTabPosition() == 0)
+			exec_type = "mqtt";
+		else
+			exec_type =  "ssh";
+
 		int minNotiDelay = 0;
 		if(!tvMinNotiDelay.getText().toString().isEmpty())
 			minNotiDelay = Integer.parseInt(tvMinNotiDelay.getText().toString());
+
 		boolean cancel = false;
 		View focusView = null;
 
@@ -198,10 +212,18 @@ public class AddFilterRuleActivity extends AppCompatActivity {
 			tvFilterPackageName.setError(getString(R.string.error_field_required));
 			focusView = tvFilterPackageName;
 			cancel = true;
-		} else if (TextUtils.isEmpty(exec) ) {
-			tvExec.setError(getString(R.string.error_field_required));
-			focusView = tvExec;
+		} else if (TextUtils.isEmpty(exec_ssh) && exec_type.equals("ssh")) {
+			tvExec_ssh.setError(getString(R.string.error_field_required));
+			focusView = tvExec_ssh;
 			cancel = true;
+		} else if (TextUtils.isEmpty(mqtt_payload) && exec_type.equals("mqtt")) {
+			tvMqttPayload.setError(getString(R.string.error_field_required));
+			focusView = tvMqttPayload;
+			cancel = true;
+		}else if (TextUtils.isEmpty(mqtt_topic) && exec_type.equals("mqtt")) {
+				tvMqttTopic.setError(getString(R.string.error_field_required));
+				focusView = tvMqttTopic;
+				cancel = true;
 		} else {
 			for (String packageName : packageNameFilter.split("\\+")) {
 				if (!packageName.matches("^[a-z][a-z0-9_]*(\\.[a-z0-9_]+)+[0-9a-z_]?$")) {
@@ -225,7 +247,10 @@ public class AddFilterRuleActivity extends AppCompatActivity {
 				filter.setTo(to);
 			}
 			filter.setIdentityID(SSHIdentity.loadSavedIdentities(this, false).getJSONArray("identities").getJSONObject(identitiesDropDown.getSelectedItemPosition() - 1).getLong("id"));
-			filter.setExec(exec);
+			filter.setExec_ssh(exec_ssh);
+			filter.setMqtt_payload(mqtt_payload);
+			filter.setMqtt_topic(mqtt_topic);
+			filter.setExec_type(exec_type);
 			if (addFilter(filter, false)) {
 				new AlertDialog.Builder(this)
 						.setTitle(R.string.filter_rule_storage_corrupted_title)

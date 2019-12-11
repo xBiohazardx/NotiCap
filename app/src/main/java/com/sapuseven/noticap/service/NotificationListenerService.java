@@ -170,8 +170,28 @@ public class NotificationListenerService extends android.service.notification.No
 						Log.i(TAG, "Executing");
 						String currentTime = new SimpleDateFormat("HH:mm", Locale.US).format(Calendar.getInstance().getTime());
 						if (!rule.useDaytime() || isTimeBetween(rule.getFrom(), rule.getTo(), currentTime)) {
-							SSHIdentity identity = SSHIdentity.fromID(this, rule.getIdentityID());
-							new SSHClient.RemoteCommand(rule.getExec(), identity).execute();
+
+							switch(rule.getExec_type()) {
+								case "mqtt":
+									if(!mqttAndroidClient.isConnected())
+									{
+										Log.d(TAG, "Not connected");
+										break;
+									}
+									Log.d(TAG, "Sending data via mqtt");
+									MqttMessage message = new MqttMessage(rule.getMqtt_payload().getBytes());
+									try {
+										mqttAndroidClient.publish(rule.getMqtt_topic(), message);
+									}catch (MqttException xe){
+										xe.printStackTrace();
+									}
+									break;
+								case "ssh":
+									Log.d(TAG, "Executing ssh command");
+									SSHIdentity identity = SSHIdentity.fromID(this, rule.getIdentityID());
+									new SSHClient.RemoteCommand(rule.getExec_ssh(), identity).execute();
+									break;
+							}
 						}
 					}
 				}
