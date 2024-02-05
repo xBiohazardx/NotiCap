@@ -1,10 +1,14 @@
 package com.sapuseven.noticap.activity;
 
+import static java.security.AccessController.getContext;
+
+import android.app.Activity;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
@@ -15,7 +19,9 @@ import android.preference.PreferenceScreen;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.Toast;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.NotificationCompat;
@@ -30,7 +36,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.security.AccessController;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.DataFormatException;
@@ -85,6 +96,9 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 				|| MqttPreferenceFragment.class.getName().equals(fragmentName);
 	}
 
+
+
+
 	public static class FiltersPreferenceFragment extends PreferenceFragment {
 		private final ArrayList<Preference> normalPreferences = new ArrayList<>();
 		private final ArrayList<CheckBoxPreference> checkBoxPreferences = new ArrayList<>();
@@ -93,6 +107,44 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 		private MenuItem actionButtonConfirmDelete;
 		private boolean deleteMode;
 		private int selected;
+
+		@RequiresApi(api = Build.VERSION_CODES.M)
+		@Override
+		public void onActivityResult(int requestCode, int resultCode, Intent data){
+			if(requestCode == 123 && resultCode == Activity.RESULT_OK){
+				Uri uri = data.getData();
+				try {
+					File f = new File(uri.getPath());
+					FilterRule.saveRules(FilterRule.loadSavedFilterRules(getContext(), false), getContext().getContentResolver().openOutputStream(uri));
+				} catch (FileNotFoundException e) {
+					Toast.makeText(getContext(), "The selected file was not found", Toast.LENGTH_LONG);
+				} catch (DataFormatException e) {
+					throw new RuntimeException(e);
+				} catch (JSONException e) {
+					throw new RuntimeException(e);
+				} catch (IOException e) {
+					Toast.makeText(getContext(), "Error writing to File", Toast.LENGTH_LONG);
+				}
+			}
+			if(requestCode == 124 && resultCode == Activity.RESULT_OK){
+				Uri uri = data.getData();
+				if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+					try {
+						InputStream is = getContext().getContentResolver().openInputStream(uri);
+						FilterRule.saveRules(getContext(), FilterRule.loadSavedFilterRules(is, false));
+						updatePrefs();
+					} catch (FileNotFoundException e) {
+						Toast.makeText(getContext(), "The selected file was not found", Toast.LENGTH_LONG);
+					} catch (DataFormatException e) {
+						throw new RuntimeException(e);
+					} catch (JSONException e) {
+						Toast.makeText(getContext(), "The content of the selected file is invalid", Toast.LENGTH_LONG);
+					} catch (IOException e) {
+						Toast.makeText(getContext(), "The selected file could not be read", Toast.LENGTH_LONG);
+					}
+				}
+			}
+		}
 
 		@Override
 		public void onCreate(Bundle savedInstanceState) {
@@ -111,6 +163,24 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 			findPreference("add_filter_rule").setOnPreferenceClickListener(preference -> {
 				Intent i = new Intent(getActivity(), AddFilterRuleActivity.class);
 				startActivity(i);
+				return true;
+			});
+
+			findPreference("export").setOnPreferenceClickListener(preference -> {
+				Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+				intent.addCategory(Intent.CATEGORY_OPENABLE);
+				intent.setType("*/*"); //not needed, but maybe usefull
+				intent.putExtra(Intent.EXTRA_TITLE, "Filter-rules.json"); //not needed, but maybe usefull
+				startActivityForResult(intent, 123);
+				return true;
+			});
+
+			findPreference("import").setOnPreferenceClickListener(preference -> {
+				Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+				intent.addCategory(Intent.CATEGORY_OPENABLE);
+				intent.setType("*/*");
+				intent.putExtra(Intent.EXTRA_TITLE, "Filter-rules.json");
+				startActivityForResult(intent, 124);
 				return true;
 			});
 

@@ -1,6 +1,8 @@
 package com.sapuseven.noticap.utils;
 
 import android.content.Context;
+import android.renderscript.ScriptGroup;
+
 import androidx.annotation.NonNull;
 
 import org.json.JSONArray;
@@ -9,6 +11,8 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.zip.DataFormatException;
 
@@ -57,23 +61,51 @@ public class FilterRule {
 		exec_ssh = rule.getString("exec_ssh");
 	}
 
-	public static void saveRules(Context context, JSONObject data) throws IOException {
-		Compressor.writeFile(context.getFileStreamPath("rules"), data.toString().getBytes("UTF-8"));
+	public static void saveRules(JSONObject data, File f) throws IOException
+	{
+		Compressor.writeFile(f, data.toString().getBytes("UTF-8"));
 	}
 
-	public static JSONObject loadSavedFilterRules(Context context, boolean overwrite) throws IOException, DataFormatException, JSONException {
-		File file = context.getFileStreamPath("rules");
-		if (!file.exists())
-			//noinspection ResultOfMethodCallIgnored
-			file.createNewFile();
+	public static void saveRules(JSONObject data, OutputStream os) throws IOException
+	{
+		os.write(data.toString().getBytes("UTF-8"));
+	}
 
-		byte[] content = Compressor.readFile(file);
+	public static void saveRules(Context context, JSONObject data) throws IOException {
+		File f = context.getFileStreamPath("rules");
+		saveRules(data, f);
+	}
 
+	public static JSONObject loadSavedFilterRules(byte[] content, boolean overwrite) throws IOException, JSONException, DataFormatException {
 		if (!overwrite && content.length > 0) {
 			String data = new String(Compressor.decompress(content), "UTF-8");
 			return new JSONObject(data);
 		} else
 			return new JSONObject().put("rules", new JSONArray());
+	}
+
+	public static JSONObject loadSavedFilterRules(File file, boolean overwrite) throws IOException, JSONException, DataFormatException {
+		if (!file.exists())
+			//noinspection ResultOfMethodCallIgnored
+			file.createNewFile();
+
+		byte[] content = Compressor.readFile(file);
+		return loadSavedFilterRules(content, overwrite);
+	}
+
+	public static JSONObject loadSavedFilterRules(InputStream is, boolean overwrite) throws IOException, JSONException, DataFormatException {
+
+		byte[] content = Compressor.readStream(is);
+		if (!overwrite && content.length > 0) {
+			String data = new String(content, "UTF-8");
+			return new JSONObject(data);
+		} else
+			return new JSONObject().put("rules", new JSONArray());
+	}
+
+	public static JSONObject loadSavedFilterRules(Context context, boolean overwrite) throws IOException, DataFormatException, JSONException {
+		File file = context.getFileStreamPath("rules");
+		return loadSavedFilterRules(file, overwrite);
 	}
 
 	@Override

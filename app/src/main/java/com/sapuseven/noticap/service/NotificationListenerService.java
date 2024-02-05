@@ -61,6 +61,7 @@ public class NotificationListenerService extends android.service.notification.No
 			}
 		});
 		MqttConnectOptions mqttConnectOptions = new MqttConnectOptions();
+		mqttConnectOptions.setServerURIs(new String[]{prefs.getString("server_uri", "")});
 		mqttConnectOptions.setAutomaticReconnect(true);
 		mqttConnectOptions.setCleanSession(false);
 
@@ -210,5 +211,11 @@ public class NotificationListenerService extends android.service.notification.No
 		Log.i(TAG, "**********************************");
 
 		// TODO: Add actions for removed Notifications
+	}
+
+	@Override
+	public void onListenerConnected() {
+		super.onListenerConnected();
+		Log.i(TAG, "Hello World");
 	}
 }

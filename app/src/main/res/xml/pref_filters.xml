@@ -6,6 +6,16 @@
 		android:title="@string/pref_setup"/>
 
 	<Preference
+		android:key="export"
+		android:summary="Export filter rules"
+		android:title="Export"/>
+
+	<Preference
+		android:key="import"
+		android:summary="Import filter rules"
+		android:title="Import"/>
+
+	<Preference
 		android:key="add_filter_rule"
 		android:title="@string/pref_add_rule"/>
 

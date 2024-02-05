@@ -246,10 +246,13 @@ public class AddFilterRuleActivity extends AppCompatActivity {
 				filter.setFrom(from);
 				filter.setTo(to);
 			}
-			filter.setIdentityID(SSHIdentity.loadSavedIdentities(this, false).getJSONArray("identities").getJSONObject(identitiesDropDown.getSelectedItemPosition() - 1).getLong("id"));
-			filter.setExec_ssh(exec_ssh);
-			filter.setMqtt_payload(mqtt_payload);
-			filter.setMqtt_topic(mqtt_topic);
+			if(exec_type.equals("ssh")) {
+				filter.setIdentityID(SSHIdentity.loadSavedIdentities(this, false).getJSONArray("identities").getJSONObject(identitiesDropDown.getSelectedItemPosition() - 1).getLong("id"));
+				filter.setExec_ssh(exec_ssh);
+			}else {
+				filter.setMqtt_payload(mqtt_payload);
+				filter.setMqtt_topic(mqtt_topic);
+			}
 			filter.setExec_type(exec_type);
 			if (addFilter(filter, false)) {
 				new AlertDialog.Builder(this)
