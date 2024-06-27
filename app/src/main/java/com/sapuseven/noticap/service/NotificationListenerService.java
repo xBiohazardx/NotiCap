@@ -30,6 +30,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.zip.DataFormatException;
 
 public class NotificationListenerService extends android.service.notification.NotificationListenerService {
@@ -60,6 +61,10 @@ public class NotificationListenerService extends android.service.notification.No
 				Log.d(TAG, "Delivery complete");
 			}
 		});
+		if(Objects.equals(prefs.getString("server_uri", ""), ""))
+			return START_STICKY;
+
+
 		MqttConnectOptions mqttConnectOptions = new MqttConnectOptions();
 		mqttConnectOptions.setServerURIs(new String[]{prefs.getString("server_uri", "")});
 		mqttConnectOptions.setAutomaticReconnect(true);
